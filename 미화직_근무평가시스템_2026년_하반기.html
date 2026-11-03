@@ -1,0 +1,2863 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미화직 근무성적평가 시스템</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1B3A6B;
+  --navy2: #25508C;
+  --gold: #C8922A;
+  --gold-light: #FDF3E3;
+  --bg: #F0F3F8;
+  --white: #FFFFFF;
+  --text: #1A2235;
+  --sub: #64748B;
+  --border: #DDE3EE;
+  --green: #1A7A4A;
+  --green-bg: #E8F7EE;
+  --red: #C0392B;
+  --red-bg: #FDEDEC;
+  --orange: #D47C0A;
+  --orange-bg: #FEF8EC;
+  --shadow-sm: 0 1px 4px rgba(27,58,107,0.07);
+  --shadow: 0 4px 16px rgba(27,58,107,0.10);
+  --shadow-lg: 0 12px 40px rgba(27,58,107,0.15);
+  --radius: 14px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+
+/* ───── 페이지 전환 ───── */
+.screen { display: none; }
+.screen.on { display: flex; }
+
+/* ───── 로그인 ───── */
+#scLogin {
+  min-height: 100vh;
+  align-items: center; justify-content: center;
+  background: linear-gradient(150deg, #1B3A6B 0%, #25508C 50%, #1a5c7a 100%);
+  position: relative; overflow: hidden;
+}
+#scLogin::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse at 70% 30%, rgba(200,146,42,0.18) 0%, transparent 60%);
+}
+.login-wrap { position: relative; z-index: 1; }
+.login-box {
+  background: white; border-radius: 22px;
+  padding: 48px 44px 40px; width: 420px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.28);
+}
+.login-head { text-align: center; margin-bottom: 36px; }
+.login-head .emblem {
+  width: 56px; height: 56px; background: var(--navy);
+  border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 26px; margin-bottom: 14px;
+  box-shadow: 0 4px 14px rgba(27,58,107,0.3);
+}
+.login-head h1 { font-family: 'Gowun Batang', serif; font-size: 20px; color: var(--navy); line-height: 1.5; margin-bottom: 8px; }
+.login-head .badge { display: inline-block; background: var(--gold-light); color: var(--gold); font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px; border: 1px solid #F0D9B5; }
+.fld { margin-bottom: 16px; }
+.fld label { display: block; font-size: 12px; font-weight: 600; color: var(--sub); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+.fld select, .fld input {
+  width: 100%; padding: 12px 14px;
+  border: 1.5px solid var(--border); border-radius: 10px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+  background: #FAFBFD; outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.fld select:focus, .fld input:focus { border-color: var(--navy2); box-shadow: 0 0 0 3px rgba(37,80,140,0.1); background: white; }
+.btn-login {
+  width: 100%; margin-top: 8px; padding: 14px;
+  background: var(--navy); color: white; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: background .15s, transform .1s;
+  letter-spacing: 0.5px;
+}
+.btn-login:hover { background: var(--navy2); }
+.btn-login:active { transform: scale(0.985); }
+.login-hint { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center; font-size: 12px; color: var(--sub); line-height: 2; }
+.err-msg { color: var(--red); font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+
+/* ───── 앱 레이아웃 ───── */
+#scApp { flex-direction: column; min-height: 100vh; }
+
+.topbar {
+  background: var(--navy); color: white; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; flex-shrink: 0;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  position: sticky; top: 0; z-index: 200;
+}
+.top-l { display: flex; align-items: center; gap: 12px; }
+.top-logo { font-family: 'Gowun Batang', serif; font-size: 16px; font-weight: 700; }
+.top-tag { background: var(--gold); color: white; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.5px; }
+.top-r { display: flex; align-items: center; gap: 12px; }
+.top-user { font-size: 13px; opacity: 0.8; }
+.btn-out { background: rgba(255,255,255,0.12); border: none; color: white; padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: background .15s; }
+.btn-out:hover { background: rgba(255,255,255,0.22); }
+
+.tabs { background: white; border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; flex-shrink: 0; }
+.tab { padding: 15px 18px; border: none; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--sub); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+.tab.on { color: var(--navy); border-bottom-color: var(--navy); font-weight: 700; }
+.tab:hover { color: var(--navy); }
+
+.body { flex: 1; padding: 24px; max-width: 1080px; margin: 0 auto; width: 100%; }
+
+/* ───── 섹션 타이틀 ───── */
+.sec-title { font-size: 16px; font-weight: 700; color: var(--navy); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.sec-title .bar { width: 3px; height: 18px; background: var(--gold); border-radius: 2px; }
+
+/* ───── 피평가자 리스트 ───── */
+.card-grid { display: flex; flex-direction: column; gap: 0; margin-bottom: 28px; background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden; }
+.list-header { display: grid; grid-template-columns: 120px 140px 1fr 160px 40px; align-items: center; padding: 10px 20px; background: var(--navy); color: white; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; }
+.ev-card {
+  display: grid; grid-template-columns: 120px 140px 1fr 160px 40px;
+  align-items: center; padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background .12s; background: white;
+}
+.ev-card:last-child { border-bottom: none; }
+.ev-card:hover { background: #F4F7FC; }
+.ev-card.sel { background: #EEF3FA; border-left: 3px solid var(--navy); padding-left: 17px; }
+.ev-card.done { }
+.done-badge { background: var(--green); color: white; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.pending-badge { background: var(--border); color: var(--sub); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.ev-name { font-size: 14px; font-weight: 700; }
+.type-tag { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 20px; display: inline-block; }
+.t-indoor { background: #EEF3FA; color: var(--navy); }
+.t-indoor2 { background: #E0EEFF; color: #1a5fa8; }
+.t-outdoor { background: var(--green-bg); color: var(--green); }
+.t-part { background: var(--orange-bg); color: var(--orange); }
+.t-chief { background: #F5EEFA; color: #6B21A8; }
+.arrow-col { color: var(--sub); font-size: 14px; text-align: right; }
+
+/* ───── 평가 폼 ───── */
+.form-card { background: white; border-radius: var(--radius); padding: 28px 32px; box-shadow: var(--shadow); }
+.form-top { display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+.form-top h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.form-top .meta { font-size: 13px; color: var(--sub); }
+
+.q-list { margin-bottom: 24px; }
+.q-label { font-size: 12px; font-weight: 700; color: var(--sub); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 10px; }
+.q-item { padding: 13px 16px; background: #F6F8FC; border-radius: 9px; border-left: 3px solid var(--navy2); margin-bottom: 8px; font-size: 13.5px; line-height: 1.6; color: var(--text); }
+
+.score-label-txt { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+.score-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+.sc-btn {
+  flex: 1; min-width: 90px; padding: 14px 8px; border: 2px solid var(--border);
+  border-radius: 11px; background: white; cursor: pointer; text-align: center;
+  font-family: inherit; transition: all .15s;
+}
+.sc-btn:hover { border-color: var(--navy2); background: #EEF3FA; }
+.sc-btn.on { border-color: var(--navy); background: var(--navy); color: white; }
+.sc-btn .sl { font-size: 11px; font-weight: 600; display: block; margin-bottom: 3px; color: var(--sub); }
+.sc-btn .sn { font-size: 20px; font-weight: 700; display: block; color: var(--navy); }
+.sc-btn.on .sl, .sc-btn.on .sn { color: white; }
+
+.comment-area { margin-bottom: 22px; }
+.comment-area label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; }
+.comment-area textarea { width: 100%; padding: 11px 13px; border: 1.5px solid var(--border); border-radius: 9px; font-family: inherit; font-size: 13.5px; resize: vertical; min-height: 72px; outline: none; transition: border-color .15s; }
+.comment-area textarea:focus { border-color: var(--navy2); }
+
+.save-row { display: flex; align-items: center; gap: 14px; }
+.btn-save { background: var(--navy); color: white; border: none; padding: 12px 28px; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .15s; }
+.btn-save:hover { background: var(--navy2); }
+.save-ok { color: var(--green); font-size: 13px; font-weight: 600; display: none; }
+
+/* ───── 평가 완료 버튼 ───── */
+.submit-bar { background: white; border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-sm); margin-top: 24px; display: flex; align-items: center; justify-content: space-between; border: 1.5px solid var(--border); }
+.submit-bar .sb-left { display: flex; flex-direction: column; gap: 4px; }
+.submit-bar .sb-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.submit-bar .sb-desc { font-size: 12px; color: var(--sub); }
+.btn-submit { background: var(--border); color: var(--sub); border: none; padding: 12px 28px; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: not-allowed; font-family: inherit; transition: all .2s; }
+.btn-submit.ready { background: var(--navy); color: white; cursor: pointer; }
+.btn-submit.ready:hover { background: var(--navy2); }
+.btn-submit.completed { background: var(--green); color: white; cursor: default; }
+.submit-progress { font-size: 13px; font-weight: 600; color: var(--sub); }
+.submit-progress .done-cnt { color: var(--navy); font-size: 18px; font-weight: 700; }
+.submit-progress .total-cnt { font-size: 13px; }
+
+/* ───── 대시보드 ───── */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+.stat { background: white; border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-sm); }
+.stat .sl { font-size: 11px; font-weight: 600; color: var(--sub); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+.stat .sv { font-size: 26px; font-weight: 700; color: var(--navy); }
+.stat .ss { font-size: 12px; color: var(--sub); margin-top: 3px; }
+.prog-bg { background: var(--border); border-radius: 20px; height: 6px; margin-top: 6px; }
+.prog-fill { background: linear-gradient(90deg, var(--navy), var(--navy2)); height: 100%; border-radius: 20px; transition: width .6s ease; }
+
+.filter-row { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.f-sel { padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 13px; outline: none; background: white; cursor: pointer; }
+.f-sel:focus { border-color: var(--navy); }
+.btn-csv { background: var(--green); color: white; border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: background .15s; }
+.btn-csv:hover { background: #166040; }
+
+.tbl-wrap { background: white; border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow-x: auto; }
+.res-tbl { width: 100%; border-collapse: collapse; font-size: 13px; white-space: nowrap; }
+.res-tbl th { background: var(--navy); color: white; padding: 11px 13px; text-align: center; font-size: 12px; font-weight: 600; }
+.res-tbl td { padding: 10px 13px; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
+.res-tbl tr:last-child td { border-bottom: none; }
+.res-tbl tr:hover td { background: #F6F8FC; }
+.res-tbl td.nm { text-align: left; font-weight: 600; }
+.chip { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.c-100 { background: var(--green-bg); color: var(--green); }
+.c-90  { background: #DBEAFE; color: #1E40AF; }
+.c-80  { background: var(--orange-bg); color: var(--orange); }
+.c-70  { background: var(--red-bg); color: var(--red); }
+.c-60  { background: #F3F4F6; color: #4B5563; }
+.c-none{ background: #F3F4F6; color: #9CA3AF; }
+
+.hidden { display: none !important; }
+/* ── 비밀번호 변경 모달 ── */
+.pw-modal { position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; display:none; align-items:center; justify-content:center; }
+.pw-modal.on { display:flex; }
+.pw-box { background:white; border-radius:18px; padding:32px 28px; width:360px; box-shadow:0 20px 60px rgba(0,0,0,0.25); }
+.pw-box h3 { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+.pw-box p { font-size:13px; color:var(--sub); margin-bottom:20px; }
+.pw-fld { margin-bottom:14px; }
+.pw-fld label { display:block; font-size:12px; font-weight:600; color:var(--sub); margin-bottom:5px; }
+.pw-fld input { width:100%; padding:11px 13px; border:1.5px solid var(--border); border-radius:9px; font-family:inherit; font-size:14px; outline:none; transition:border-color .15s; }
+.pw-fld input:focus { border-color:var(--navy); }
+.pw-err { color:var(--red); font-size:12px; margin-bottom:12px; display:none; }
+.pw-ok { color:var(--green); font-size:12px; margin-bottom:12px; display:none; }
+.pw-btns { display:flex; gap:10px; }
+.pw-btns button { flex:1; padding:11px; border-radius:9px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; border:none; }
+.pw-cancel { background:white; border:1.5px solid var(--border) !important; color:var(--sub); }
+.pw-confirm { background:var(--navy); color:white; }
+.pw-confirm:hover { background:var(--navy2); }
+/* ── 필터 토글 ── */
+.filter-toggle { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.ftgl-btn { padding:7px 16px; border:1.5px solid var(--border); border-radius:20px; background:white; font-family:inherit; font-size:13px; font-weight:600; color:var(--sub); cursor:pointer; transition:all .15s; }
+.ftgl-btn:hover { border-color:var(--navy); color:var(--navy); }
+.ftgl-btn.on { background:var(--navy); border-color:var(--navy); color:white; }
+.ftgl-btn.on-green { background:var(--green); border-color:var(--green); color:white; }
+.ftgl-btn.on-orange { background:var(--orange); border-color:var(--orange); color:white; }
+#loadingOverlay { position:fixed; inset:0; background:rgba(255,255,255,0.85); z-index:9999; display:none; align-items:center; justify-content:center; flex-direction:column; gap:14px; }
+#loadingOverlay.on { display:flex; }
+.spinner { width:36px; height:36px; border:4px solid var(--border); border-top-color:var(--navy); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-txt { font-size:14px; font-weight:600; color:var(--navy); }
+
+@media(max-width:680px){
+  .stat-grid { grid-template-columns: repeat(2,1fr); }
+  .body { padding: 16px; }
+  .form-card { padding: 20px 18px; }
+  .sc-btn { min-width: 60px; padding: 10px 4px; }
+  .sc-btn .sn { font-size: 16px; }
+  .login-box { width: 92vw; padding: 36px 24px 30px; }
+}
+</style>
+</head>
+<body>
+
+<div id="loadingOverlay"><div class="spinner"></div><div class="loading-txt" id="loadingTxt">로딩 중...</div></div>
+<div class="pw-modal" id="pwModal">
+  <div class="pw-box">
+    <h3>🔒 비밀번호 변경</h3>
+    <p>새로운 비밀번호를 설정해 주세요.</p>
+    <div class="pw-fld">
+      <label>현재 비밀번호</label>
+      <input type="password" id="pwCurrent" placeholder="현재 비밀번호 입력">
+    </div>
+    <div class="pw-fld">
+      <label>새 비밀번호</label>
+      <input type="password" id="pwNew" placeholder="새 비밀번호 입력">
+    </div>
+    <div class="pw-fld">
+      <label>새 비밀번호 확인</label>
+      <input type="password" id="pwConfirm" placeholder="새 비밀번호 재입력">
+    </div>
+    <div class="pw-err" id="pwErr"></div>
+    <div class="pw-ok" id="pwOk">✅ 비밀번호가 변경되었습니다.</div>
+    <div class="pw-btns">
+      <button class="pw-cancel" onclick="hideChangePw()">취소</button>
+      <button class="pw-confirm" onclick="doChangePw()">변경하기</button>
+    </div>
+  </div>
+</div>
+<!-- ══════ 로그인 ══════ -->
+<div id="scLogin" class="screen on">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-head">
+        <div class="emblem">🏫</div>
+        <h1>미화직 근무성적평가<br>시스템</h1>
+        <span class="badge">2026년 하반기</span>
+      </div>
+      <div class="fld">
+        <label>이름</label>
+        <input type="text" id="inName" placeholder="이름을 입력하세요" onkeydown="if(event.key==='Enter')document.getElementById('inPw').focus()">
+      </div>
+      <div class="fld">
+        <label>비밀번호</label>
+        <input type="password" id="inPw" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')login()">
+      </div>
+      <button class="btn-login" onclick="login()">로그인</button>
+      <div class="err-msg" id="errMsg">이름 또는 비밀번호가 올바르지 않습니다.</div>
+      <div class="login-hint">
+        💡 비밀번호는 생년월일 6자입니다.<br>최초 로그인 후 비밀번호를 변경하여 주시기 바랍니다.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ 앱 ══════ -->
+<div id="scApp" class="screen" style="flex-direction:column;">
+  <div class="topbar">
+    <div class="top-l">
+      <span class="top-logo">📋 미화직 근무성적평가</span>
+      <span class="top-tag">2026 하반기</span>
+    </div>
+    <div class="top-r">
+      <span class="top-user" id="topUser"></span>
+      <button class="btn-out" onclick="showChangePw()" style="background:rgba(255,255,255,0.12);">🔒 비밀번호 변경</button>
+      <button class="btn-out" onclick="logout()">로그아웃</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" id="tab1" onclick="goTab(1)">📝 평가 입력</button>
+    <button class="tab" id="tab2" onclick="goTab(2)" style="display:none">📊 관리자 대시보드</button>
+  </div>
+  <div class="body">
+    <!-- 평가 입력 -->
+    <div id="pEval">
+      <div class="sec-title"><span class="bar"></span>담당 피평가자 목록</div>
+      <div class="filter-toggle" id="filterToggle">
+        <button class="ftgl-btn on" onclick="setFilter('all', this)">전체</button>
+        <button class="ftgl-btn" onclick="setFilter('pending', this)">⏳ 미평가만</button>
+        <button class="ftgl-btn" onclick="setFilter('done', this)">✅ 완료만</button>
+      </div>
+      <div class="card-grid" id="cardGrid"></div>
+      <div id="formArea"></div>
+      <div class="submit-bar" id="submitBar" style="display:none">
+        <div class="sb-left">
+          <div class="sb-title">평가 제출</div>
+          <div class="sb-desc" id="submitDesc">모든 피평가자 평가 완료 후 제출 가능합니다.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:20px;">
+          <div class="submit-progress"><span class="done-cnt" id="doneCnt">0</span><span class="total-cnt" id="totalCnt"> / 0명 완료</span></div>
+          <button class="btn-submit" id="submitBtn" onclick="submitEval()">평가 완료</button>
+        </div>
+      </div>
+    </div>
+    <!-- 대시보드 -->
+    <div id="pDash" class="hidden">
+      <div class="sec-title"><span class="bar"></span>전체 평가 현황</div>
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="sec-title" style="margin-top:8px"><span class="bar"></span>평가 결과 집계</div>
+      <div class="filter-row">
+        <select class="f-sel" id="fType" onchange="renderDash()">
+          <option value="">전체 구분</option>
+          <option value="실내A">실내 근무자A (행정부서팀장 있음)</option>
+          <option value="실내B">실내 근무자B (행정부서팀장 없음)</option>
+          <option value="외곽">외곽 근무자</option>
+          <option value="파트장">파트장</option>
+          <option value="반장">반장</option>
+        </select>
+        <button class="btn-csv" onclick="dlCSV()">⬇ CSV 다운로드</button>
+      </div>
+      <div class="tbl-wrap"><table class="res-tbl" id="resTbl"></table></div>
+
+      <div class="sec-title" style="margin-top:28px"><span class="bar"></span>평가자 비밀번호 현황</div>
+      <div class="tbl-wrap">
+        <table class="res-tbl" id="pwTbl"></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════
+//  데이터
+// ════════════════════════════
+const EES = [
+  {
+    "id": "e001",
+    "name": "김성준",
+    "type": "반장",
+    "zone": "반장",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "-"
+  },
+  {
+    "id": "e002",
+    "name": "김동신",
+    "type": "파트장",
+    "zone": "1파트장",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "1파트"
+  },
+  {
+    "id": "e003",
+    "name": "오종익",
+    "type": "파트장",
+    "zone": "2파트장",
+    "job": "무기계약직(미화)",
+    "gender": "남",
+    "part": "2파트"
+  },
+  {
+    "id": "e004",
+    "name": "오길자",
+    "type": "실내A",
+    "zone": "경영관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e005",
+    "name": "정훈희",
+    "type": "실내A",
+    "zone": "경영관 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e006",
+    "name": "조만순",
+    "type": "실내A",
+    "zone": "경영관 3층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e007",
+    "name": "권영희",
+    "type": "실내A",
+    "zone": "경영관 4층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e008",
+    "name": "김태순",
+    "type": "실내A",
+    "zone": "경영관 5층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e009",
+    "name": "천예정",
+    "type": "실내B",
+    "zone": "계산관",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e010",
+    "name": "박초애",
+    "type": "실내B",
+    "zone": "과학관 1층 2층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e011",
+    "name": "허두례",
+    "type": "실내B",
+    "zone": "과학관 3층 4층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e012",
+    "name": "김막동",
+    "type": "실내A",
+    "zone": "금강관",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e013",
+    "name": "이영미",
+    "type": "실내A",
+    "zone": "남산학사 여자",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e014",
+    "name": "김진기",
+    "type": "실내A",
+    "zone": "남산학사 여자",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e015",
+    "name": "박영해",
+    "type": "실내A",
+    "zone": "다향관",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e016",
+    "name": "박규현",
+    "type": "실내A",
+    "zone": "만해관 2층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e017",
+    "name": "조춘자",
+    "type": "실내A",
+    "zone": "만해관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e018",
+    "name": "강희증",
+    "type": "실내A",
+    "zone": "만해관 3층, 법학관 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e019",
+    "name": "이혜옥",
+    "type": "실내A",
+    "zone": "만해관 4층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e020",
+    "name": "허성순",
+    "type": "실내A",
+    "zone": "명진관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e021",
+    "name": "김현서",
+    "type": "실내A",
+    "zone": "명진관 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e022",
+    "name": "박영춘",
+    "type": "실내A",
+    "zone": "명진관 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e023",
+    "name": "지민순",
+    "type": "실내A",
+    "zone": "문화관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e024",
+    "name": "이영순",
+    "type": "실내A",
+    "zone": "문화관 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e025",
+    "name": "엄순자",
+    "type": "실내A",
+    "zone": "문화관 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e026",
+    "name": "조성미",
+    "type": "실내A",
+    "zone": "문화관 4층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e027",
+    "name": "왕루이리",
+    "type": "실내A",
+    "zone": "문화관 지하 1층 2층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e028",
+    "name": "이유경",
+    "type": "실내A",
+    "zone": "법학관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e029",
+    "name": "김수영",
+    "type": "실내A",
+    "zone": "법학관 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e030",
+    "name": "김명자",
+    "type": "실내A",
+    "zone": "법학관 4층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e031",
+    "name": "이선희",
+    "type": "실내A",
+    "zone": "본관 2층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e032",
+    "name": "장현미",
+    "type": "실내A",
+    "zone": "본관 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e033",
+    "name": "김인숙",
+    "type": "실내A",
+    "zone": "본관 4층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e034",
+    "name": "이옥점",
+    "type": "실내A",
+    "zone": "사회과학관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e035",
+    "name": "전명순",
+    "type": "실내A",
+    "zone": "사회과학관 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e036",
+    "name": "임은경",
+    "type": "실내A",
+    "zone": "사회과학관 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e037",
+    "name": "안복순",
+    "type": "실내A",
+    "zone": "사회과학관 4층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e038",
+    "name": "양선녀",
+    "type": "실내A",
+    "zone": "사회과학관 5층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e039",
+    "name": "김삼덕",
+    "type": "실내A",
+    "zone": "신공학관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e040",
+    "name": "전순화",
+    "type": "실내B",
+    "zone": "신공학관 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e041",
+    "name": "김동심",
+    "type": "실내B",
+    "zone": "신공학관 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e042",
+    "name": "장정옥",
+    "type": "실내B",
+    "zone": "신공학관 4층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e043",
+    "name": "김성순",
+    "type": "실내B",
+    "zone": "신공학관 5층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e044",
+    "name": "양명자",
+    "type": "실내B",
+    "zone": "신공학관 6층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e045",
+    "name": "강이순",
+    "type": "실내B",
+    "zone": "신공학관 8층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e046",
+    "name": "전현경",
+    "type": "실내A",
+    "zone": "신공학관 9층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e047",
+    "name": "이영래",
+    "type": "실내B",
+    "zone": "신공학관 10층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e048",
+    "name": "홍옥자",
+    "type": "실내B",
+    "zone": "신공학관 10층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e049",
+    "name": "윤양순",
+    "type": "실내A",
+    "zone": "원흥관 1층, 2층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e050",
+    "name": "정효분",
+    "type": "실내A",
+    "zone": "원흥관 2층, 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e051",
+    "name": "전미혜",
+    "type": "실내A",
+    "zone": "원흥관 4층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e052",
+    "name": "김입분",
+    "type": "실내A",
+    "zone": "원흥관 5층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e053",
+    "name": "남순자",
+    "type": "실내A",
+    "zone": "원흥관 6층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e054",
+    "name": "박명자",
+    "type": "실내A",
+    "zone": "원흥별관",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e055",
+    "name": "허복자",
+    "type": "실내A",
+    "zone": "정각원, 대각전",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e056",
+    "name": "조영애",
+    "type": "실내A",
+    "zone": "정보문화관 1층, 2층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e057",
+    "name": "이말순",
+    "type": "실내A",
+    "zone": "정보문화관 P동 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e058",
+    "name": "김향란",
+    "type": "실내A",
+    "zone": "정보문화관 P동 4층, 5층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e059",
+    "name": "정정자",
+    "type": "실내A",
+    "zone": "정보문화관 P동 6층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e060",
+    "name": "권명란",
+    "type": "실내A",
+    "zone": "정보문화관 Q동",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e061",
+    "name": "구영아",
+    "type": "실내B",
+    "zone": "조소/지하",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e062",
+    "name": "고복순",
+    "type": "실내A",
+    "zone": "중앙도서관 1,4층,지하1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e063",
+    "name": "문용희",
+    "type": "실내A",
+    "zone": "중앙도서관 2,3층,지하2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e064",
+    "name": "주명자",
+    "type": "실내A",
+    "zone": "체육관",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e065",
+    "name": "차예경",
+    "type": "실내B",
+    "zone": "충무로신관 1층 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e066",
+    "name": "박현숙",
+    "type": "실내A",
+    "zone": "충무로신관 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e067",
+    "name": "최인선",
+    "type": "실내A",
+    "zone": "충무로 신관 4층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e068",
+    "name": "이양숙",
+    "type": "실내A",
+    "zone": "충무로본관 1층 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e069",
+    "name": "박지혜",
+    "type": "실내A",
+    "zone": "충무로본관 3층 4층 5층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e070",
+    "name": "고미숙",
+    "type": "실내A",
+    "zone": "충무로본관 6층, 7층, 11층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e071",
+    "name": "소유미",
+    "type": "실내A",
+    "zone": "충무로본관 8층 9층 10층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e072",
+    "name": "이옥의",
+    "type": "실내A",
+    "zone": "학림관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e073",
+    "name": "박길자",
+    "type": "실내A",
+    "zone": "학림관 2층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e074",
+    "name": "곽영단",
+    "type": "실내A",
+    "zone": "학림관 3층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e075",
+    "name": "김정임",
+    "type": "실내A",
+    "zone": "학림관 4층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e076",
+    "name": "박호분",
+    "type": "실내A",
+    "zone": "학림관 5층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "1파트"
+  },
+  {
+    "id": "e077",
+    "name": "우승미",
+    "type": "실내A",
+    "zone": "학술관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e078",
+    "name": "이세진",
+    "type": "실내A",
+    "zone": "학술관 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e079",
+    "name": "최영조",
+    "type": "실내A",
+    "zone": "학술관 3층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e080",
+    "name": "김영순",
+    "type": "실내A",
+    "zone": "학술관 4층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e081",
+    "name": "김막례",
+    "type": "실내A",
+    "zone": "혜화관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e082",
+    "name": "김해임",
+    "type": "실내A",
+    "zone": "혜화관 2층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e083",
+    "name": "손정미",
+    "type": "실내A",
+    "zone": "혜화관 3층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e084",
+    "name": "김수경",
+    "type": "실내A",
+    "zone": "혜화관 4층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e085",
+    "name": "김미숙",
+    "type": "실내A",
+    "zone": "혜화관 5층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e086",
+    "name": "임경이",
+    "type": "실내A",
+    "zone": "혜화관 6층",
+    "job": "무기계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e087",
+    "name": "문종심",
+    "type": "실내A",
+    "zone": "혜화별관 1층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e088",
+    "name": "정순",
+    "type": "실내A",
+    "zone": "혜화별관 3층",
+    "job": "한시계약직(미화)",
+    "gender": "여",
+    "part": "2파트"
+  },
+  {
+    "id": "e089",
+    "name": "오창진",
+    "type": "외곽",
+    "zone": "외곽 1파트",
+    "job": "무기계약직(미화)",
+    "gender": "남",
+    "part": "1파트"
+  },
+  {
+    "id": "e090",
+    "name": "김태현",
+    "type": "외곽",
+    "zone": "외곽 1파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "1파트"
+  },
+  {
+    "id": "e091",
+    "name": "안창남",
+    "type": "외곽",
+    "zone": "외곽 1파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "1파트"
+  },
+  {
+    "id": "e092",
+    "name": "허영무",
+    "type": "외곽",
+    "zone": "외곽 1파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "1파트"
+  },
+  {
+    "id": "e093",
+    "name": "김종호",
+    "type": "외곽",
+    "zone": "외곽 1파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "1파트"
+  },
+  {
+    "id": "e094",
+    "name": "박인규",
+    "type": "외곽",
+    "zone": "외곽 1파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "1파트"
+  },
+  {
+    "id": "e095",
+    "name": "김일규",
+    "type": "외곽",
+    "zone": "외곽 2파트",
+    "job": "무기계약직(미화)",
+    "gender": "남",
+    "part": "2파트"
+  },
+  {
+    "id": "e096",
+    "name": "박관헌",
+    "type": "외곽",
+    "zone": "외곽 2파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "2파트"
+  },
+  {
+    "id": "e097",
+    "name": "윤승필",
+    "type": "외곽",
+    "zone": "외곽 2파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "2파트"
+  },
+  {
+    "id": "e098",
+    "name": "양경욱",
+    "type": "외곽",
+    "zone": "외곽 2파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "2파트"
+  },
+  {
+    "id": "e099",
+    "name": "최윤석",
+    "type": "외곽",
+    "zone": "외곽 2파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "2파트"
+  },
+  {
+    "id": "e100",
+    "name": "김원식",
+    "type": "외곽",
+    "zone": "외곽 2파트",
+    "job": "한시계약직(미화)",
+    "gender": "남",
+    "part": "2파트"
+  }
+];
+
+const EVRS = [
+  {
+    "id": "v01",
+    "name": "김해덕",
+    "role": "캠퍼스관리팀장",
+    "pw": "720801",
+    "initialPw": "720801",
+    "isAdmin": false,
+    "targets": [
+      "e001",
+      "e002",
+      "e003",
+      "e004",
+      "e005",
+      "e006",
+      "e007",
+      "e008",
+      "e009",
+      "e010",
+      "e011",
+      "e012",
+      "e013",
+      "e014",
+      "e015",
+      "e016",
+      "e017",
+      "e018",
+      "e019",
+      "e020",
+      "e021",
+      "e022",
+      "e023",
+      "e024",
+      "e025",
+      "e026",
+      "e027",
+      "e028",
+      "e029",
+      "e030",
+      "e031",
+      "e032",
+      "e033",
+      "e034",
+      "e035",
+      "e036",
+      "e037",
+      "e038",
+      "e039",
+      "e040",
+      "e041",
+      "e042",
+      "e043",
+      "e044",
+      "e045",
+      "e046",
+      "e047",
+      "e048",
+      "e049",
+      "e050",
+      "e051",
+      "e052",
+      "e053",
+      "e054",
+      "e055",
+      "e056",
+      "e057",
+      "e058",
+      "e059",
+      "e060",
+      "e061",
+      "e062",
+      "e063",
+      "e064",
+      "e065",
+      "e066",
+      "e067",
+      "e068",
+      "e069",
+      "e070",
+      "e071",
+      "e072",
+      "e073",
+      "e074",
+      "e075",
+      "e076",
+      "e077",
+      "e078",
+      "e079",
+      "e080",
+      "e081",
+      "e082",
+      "e083",
+      "e084",
+      "e085",
+      "e086",
+      "e087",
+      "e088",
+      "e089",
+      "e090",
+      "e091",
+      "e092",
+      "e093",
+      "e094",
+      "e095",
+      "e096",
+      "e097",
+      "e098",
+      "e099",
+      "e100"
+    ],
+    "wt": {
+      "실내A": 10,
+      "실내B": 10,
+      "외곽": 10,
+      "파트장": 20,
+      "반장": 20
+    },
+    "area": "전체"
+  },
+  {
+    "id": "v02",
+    "name": "지현종",
+    "role": "캠퍼스관리팀 과장",
+    "pw": "820221",
+    "initialPw": "820221",
+    "isAdmin": false,
+    "targets": [
+      "e001",
+      "e002",
+      "e003",
+      "e004",
+      "e005",
+      "e006",
+      "e007",
+      "e008",
+      "e009",
+      "e010",
+      "e011",
+      "e012",
+      "e013",
+      "e014",
+      "e015",
+      "e016",
+      "e017",
+      "e018",
+      "e019",
+      "e020",
+      "e021",
+      "e022",
+      "e023",
+      "e024",
+      "e025",
+      "e026",
+      "e027",
+      "e028",
+      "e029",
+      "e030",
+      "e031",
+      "e032",
+      "e033",
+      "e034",
+      "e035",
+      "e036",
+      "e037",
+      "e038",
+      "e039",
+      "e040",
+      "e041",
+      "e042",
+      "e043",
+      "e044",
+      "e045",
+      "e046",
+      "e047",
+      "e048",
+      "e049",
+      "e050",
+      "e051",
+      "e052",
+      "e053",
+      "e054",
+      "e055",
+      "e056",
+      "e057",
+      "e058",
+      "e059",
+      "e060",
+      "e061",
+      "e062",
+      "e063",
+      "e064",
+      "e065",
+      "e066",
+      "e067",
+      "e068",
+      "e069",
+      "e070",
+      "e071",
+      "e072",
+      "e073",
+      "e074",
+      "e075",
+      "e076",
+      "e077",
+      "e078",
+      "e079",
+      "e080",
+      "e081",
+      "e082",
+      "e083",
+      "e084",
+      "e085",
+      "e086",
+      "e087",
+      "e088",
+      "e089",
+      "e090",
+      "e091",
+      "e092",
+      "e093",
+      "e094",
+      "e095",
+      "e096",
+      "e097",
+      "e098",
+      "e099",
+      "e100"
+    ],
+    "wt": {
+      "실내A": 20,
+      "실내B": 30,
+      "외곽": 30,
+      "파트장": 30,
+      "반장": 40
+    },
+    "area": "전체"
+  },
+  {
+    "id": "v03",
+    "name": "이우영",
+    "role": "캠퍼스관리팀 미화실장",
+    "pw": "650704",
+    "initialPw": "650704",
+    "isAdmin": false,
+    "targets": [
+      "e001",
+      "e002",
+      "e003",
+      "e004",
+      "e005",
+      "e006",
+      "e007",
+      "e008",
+      "e009",
+      "e010",
+      "e011",
+      "e012",
+      "e013",
+      "e014",
+      "e015",
+      "e016",
+      "e017",
+      "e018",
+      "e019",
+      "e020",
+      "e021",
+      "e022",
+      "e023",
+      "e024",
+      "e025",
+      "e026",
+      "e027",
+      "e028",
+      "e029",
+      "e030",
+      "e031",
+      "e032",
+      "e033",
+      "e034",
+      "e035",
+      "e036",
+      "e037",
+      "e038",
+      "e039",
+      "e040",
+      "e041",
+      "e042",
+      "e043",
+      "e044",
+      "e045",
+      "e046",
+      "e047",
+      "e048",
+      "e049",
+      "e050",
+      "e051",
+      "e052",
+      "e053",
+      "e054",
+      "e055",
+      "e056",
+      "e057",
+      "e058",
+      "e059",
+      "e060",
+      "e061",
+      "e062",
+      "e063",
+      "e064",
+      "e065",
+      "e066",
+      "e067",
+      "e068",
+      "e069",
+      "e070",
+      "e071",
+      "e072",
+      "e073",
+      "e074",
+      "e075",
+      "e076",
+      "e077",
+      "e078",
+      "e079",
+      "e080",
+      "e081",
+      "e082",
+      "e083",
+      "e084",
+      "e085",
+      "e086",
+      "e087",
+      "e088",
+      "e089",
+      "e090",
+      "e091",
+      "e092",
+      "e093",
+      "e094",
+      "e095",
+      "e096",
+      "e097",
+      "e098",
+      "e099",
+      "e100"
+    ],
+    "wt": {
+      "실내A": 20,
+      "실내B": 30,
+      "외곽": 30,
+      "파트장": 30,
+      "반장": 40
+    },
+    "area": "전체"
+  },
+  {
+    "id": "v04",
+    "name": "김성준",
+    "role": "캠퍼스관리팀 미화반장",
+    "pw": "680401",
+    "initialPw": "680401",
+    "isAdmin": false,
+    "targets": [
+      "e002",
+      "e003",
+      "e004",
+      "e005",
+      "e006",
+      "e007",
+      "e008",
+      "e009",
+      "e010",
+      "e011",
+      "e012",
+      "e013",
+      "e014",
+      "e015",
+      "e016",
+      "e017",
+      "e018",
+      "e019",
+      "e020",
+      "e021",
+      "e022",
+      "e023",
+      "e024",
+      "e025",
+      "e026",
+      "e027",
+      "e028",
+      "e029",
+      "e030",
+      "e031",
+      "e032",
+      "e033",
+      "e034",
+      "e035",
+      "e036",
+      "e037",
+      "e038",
+      "e039",
+      "e040",
+      "e041",
+      "e042",
+      "e043",
+      "e044",
+      "e045",
+      "e046",
+      "e047",
+      "e048",
+      "e049",
+      "e050",
+      "e051",
+      "e052",
+      "e053",
+      "e054",
+      "e055",
+      "e056",
+      "e057",
+      "e058",
+      "e059",
+      "e060",
+      "e061",
+      "e062",
+      "e063",
+      "e064",
+      "e065",
+      "e066",
+      "e067",
+      "e068",
+      "e069",
+      "e070",
+      "e071",
+      "e072",
+      "e073",
+      "e074",
+      "e075",
+      "e076",
+      "e077",
+      "e078",
+      "e079",
+      "e080",
+      "e081",
+      "e082",
+      "e083",
+      "e084",
+      "e085",
+      "e086",
+      "e087",
+      "e088",
+      "e089",
+      "e090",
+      "e091",
+      "e092",
+      "e093",
+      "e094",
+      "e095",
+      "e096",
+      "e097",
+      "e098",
+      "e099",
+      "e100"
+    ],
+    "wt": {
+      "실내A": 10,
+      "실내B": 15,
+      "외곽": 15,
+      "파트장": 20
+    },
+    "area": "전체(본인 제외)"
+  },
+  {
+    "id": "v05",
+    "name": "김동신",
+    "role": "캠퍼스관리팀 1파트장",
+    "pw": "710915",
+    "initialPw": "710915",
+    "isAdmin": false,
+    "targets": [
+      "e009",
+      "e012",
+      "e013",
+      "e014",
+      "e015",
+      "e031",
+      "e032",
+      "e033",
+      "e039",
+      "e040",
+      "e041",
+      "e042",
+      "e043",
+      "e044",
+      "e045",
+      "e046",
+      "e047",
+      "e048",
+      "e049",
+      "e050",
+      "e051",
+      "e052",
+      "e053",
+      "e054",
+      "e056",
+      "e057",
+      "e058",
+      "e059",
+      "e060",
+      "e062",
+      "e063",
+      "e064",
+      "e065",
+      "e066",
+      "e067",
+      "e068",
+      "e069",
+      "e070",
+      "e071",
+      "e072",
+      "e073",
+      "e074",
+      "e075",
+      "e076",
+      "e089",
+      "e090",
+      "e091",
+      "e092",
+      "e093",
+      "e094"
+    ],
+    "wt": {
+      "실내A": 10,
+      "실내B": 15,
+      "외곽": 15
+    },
+    "area": "1파트 평가(본인 제외)"
+  },
+  {
+    "id": "v06",
+    "name": "오종익",
+    "role": "캠퍼스관리팀 2파트장",
+    "pw": "720706",
+    "initialPw": "720706",
+    "isAdmin": false,
+    "targets": [
+      "e004",
+      "e005",
+      "e006",
+      "e007",
+      "e008",
+      "e010",
+      "e011",
+      "e016",
+      "e017",
+      "e018",
+      "e019",
+      "e020",
+      "e021",
+      "e022",
+      "e023",
+      "e024",
+      "e025",
+      "e026",
+      "e027",
+      "e028",
+      "e029",
+      "e030",
+      "e034",
+      "e035",
+      "e036",
+      "e037",
+      "e038",
+      "e055",
+      "e061",
+      "e077",
+      "e078",
+      "e079",
+      "e080",
+      "e081",
+      "e082",
+      "e083",
+      "e084",
+      "e085",
+      "e086",
+      "e087",
+      "e088",
+      "e095",
+      "e096",
+      "e097",
+      "e098",
+      "e099",
+      "e100"
+    ],
+    "wt": {
+      "실내A": 10,
+      "실내B": 15,
+      "외곽": 15
+    },
+    "area": "2파트 평가(본인 제외)"
+  },
+  {
+    "id": "v07",
+    "name": "김계철",
+    "role": "예술대학(원)·영상대학원 학사운영실 과장",
+    "pw": "830830",
+    "initialPw": "830830",
+    "isAdmin": false,
+    "targets": [
+      "e087",
+      "e088"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "혜화별관"
+  },
+  {
+    "id": "v08",
+    "name": "김용석",
+    "role": "공과대학·첨단융합대학 학사운영실장",
+    "pw": "690116",
+    "initialPw": "690116",
+    "isAdmin": false,
+    "targets": [
+      "e049",
+      "e050",
+      "e051",
+      "e052",
+      "e053",
+      "e054"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "원흥관"
+  },
+  {
+    "id": "v09",
+    "name": "김웅갑",
+    "role": "미래융합교육원 행정팀장",
+    "pw": "761011",
+    "initialPw": "761011",
+    "isAdmin": false,
+    "targets": [
+      "e077",
+      "e078",
+      "e079",
+      "e080"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "학술관"
+  },
+  {
+    "id": "v10",
+    "name": "김종윤",
+    "role": "불교학술원 행정팀장",
+    "pw": "780506",
+    "initialPw": "780506",
+    "isAdmin": false,
+    "targets": [
+      "e066",
+      "e067",
+      "e068",
+      "e069",
+      "e070"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "충무로관 본관"
+  },
+  {
+    "id": "v11",
+    "name": "김종주",
+    "role": "글로벌학생팀장",
+    "pw": "780221",
+    "initialPw": "780221",
+    "isAdmin": false,
+    "targets": [
+      "e046"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "신공학관 9층"
+  },
+  {
+    "id": "v12",
+    "name": "김지우",
+    "role": "예술대학(원)·영상대학원 학사운영실장",
+    "pw": "790504",
+    "initialPw": "790504",
+    "isAdmin": false,
+    "targets": [
+      "e023",
+      "e024",
+      "e025",
+      "e026",
+      "e027"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "문화관"
+  },
+  {
+    "id": "v13",
+    "name": "김효정",
+    "role": "법과대학 학사운영실장",
+    "pw": "750411",
+    "initialPw": "750411",
+    "isAdmin": false,
+    "targets": [
+      "e016",
+      "e017",
+      "e018",
+      "e019",
+      "e028",
+      "e029",
+      "e030"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "법학관, 만해관"
+  },
+  {
+    "id": "v14",
+    "name": "문상국",
+    "role": "정보운영팀장",
+    "pw": "700203",
+    "initialPw": "700203",
+    "isAdmin": false,
+    "targets": [
+      "e015"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "다향관"
+  },
+  {
+    "id": "v15",
+    "name": "박선희",
+    "role": "문과·이과대학 학사운영실장",
+    "pw": "740209",
+    "initialPw": "740209",
+    "isAdmin": false,
+    "targets": [
+      "e020",
+      "e021",
+      "e022"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "명진관"
+  },
+  {
+    "id": "v16",
+    "name": "방중혁",
+    "role": "기획예산실장",
+    "pw": "740412",
+    "initialPw": "740412",
+    "isAdmin": false,
+    "targets": [
+      "e033"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "본관 4층"
+  },
+  {
+    "id": "v17",
+    "name": "유진",
+    "role": "장학팀장",
+    "pw": "760103",
+    "initialPw": "760103",
+    "isAdmin": false,
+    "targets": [
+      "e032"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "본관 3층"
+  },
+  {
+    "id": "v18",
+    "name": "이민기",
+    "role": "정각원 행정팀장",
+    "pw": "741211",
+    "initialPw": "741211",
+    "isAdmin": false,
+    "targets": [
+      "e055"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "정각원, 대각전"
+  },
+  {
+    "id": "v19",
+    "name": "이연주",
+    "role": "사범대학(교육대학원·교육서비스과학대학원)·미래융합대학원 학사운영실장",
+    "pw": "710110",
+    "initialPw": "710110",
+    "isAdmin": false,
+    "targets": [
+      "e072",
+      "e073",
+      "e074",
+      "e075",
+      "e076"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "학림관"
+  },
+  {
+    "id": "v20",
+    "name": "이창용",
+    "role": "학술정보서비스팀장",
+    "pw": "730702",
+    "initialPw": "730702",
+    "isAdmin": false,
+    "targets": [
+      "e062",
+      "e063"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "중앙도서관"
+  },
+  {
+    "id": "v21",
+    "name": "임수진",
+    "role": "남산학사 행정팀장",
+    "pw": "710517",
+    "initialPw": "710517",
+    "isAdmin": false,
+    "targets": [
+      "e013",
+      "e014",
+      "e039",
+      "e071"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "신공학관 1층, 남산학사, 충무학사"
+  },
+  {
+    "id": "v22",
+    "name": "임종빈",
+    "role": "대학스포츠부 과장",
+    "pw": "730828",
+    "initialPw": "730828",
+    "isAdmin": false,
+    "targets": [
+      "e012",
+      "e064"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "체육관, 금강관"
+  },
+  {
+    "id": "v23",
+    "name": "양윤정",
+    "role": "산학경영팀장",
+    "pw": "741108",
+    "initialPw": "741108",
+    "isAdmin": false,
+    "targets": [
+      "e031"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "본관 2층"
+  },
+  {
+    "id": "v24",
+    "name": "장인준",
+    "role": "경영대학(경영전문대학원)·국제정보보호대학원 학사운영실장",
+    "pw": "760830",
+    "initialPw": "760830",
+    "isAdmin": false,
+    "targets": [
+      "e004",
+      "e005",
+      "e006",
+      "e007",
+      "e008"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "경영관"
+  },
+  {
+    "id": "v25",
+    "name": "전경예",
+    "role": "경찰사법대학(경찰사법대학원)·미래융합대학 학사운영실 팀원",
+    "pw": "911027",
+    "initialPw": "911027",
+    "isAdmin": false,
+    "targets": [
+      "e082",
+      "e083"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "혜화관 2-3층"
+  },
+  {
+    "id": "v26",
+    "name": "정현록",
+    "role": "사회과학대학(행정대학원)·언론정보대학원 학사운영실",
+    "pw": "711218",
+    "initialPw": "711218",
+    "isAdmin": false,
+    "targets": [
+      "e034",
+      "e035",
+      "e036",
+      "e037",
+      "e038"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "사회과학관"
+  },
+  {
+    "id": "v27",
+    "name": "조성환",
+    "role": "한국어교육원 학사운영실장",
+    "pw": "730701",
+    "initialPw": "730701",
+    "isAdmin": false,
+    "targets": [
+      "e081",
+      "e084",
+      "e085",
+      "e086"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "혜화관 1층,4-6층"
+  },
+  {
+    "id": "v28",
+    "name": "최문규",
+    "role": "SW융합지원센터장",
+    "pw": "731212",
+    "initialPw": "731212",
+    "isAdmin": false,
+    "targets": [
+      "e056",
+      "e057",
+      "e058",
+      "e059",
+      "e060"
+    ],
+    "wt": {
+      "실내A": 30
+    },
+    "area": "정보문화관"
+  },
+  {
+    "id": "admin",
+    "name": "관리자",
+    "role": "시스템관리자",
+    "pw": "admin1234",
+    "isAdmin": true,
+    "targets": [],
+    "wt": {}
+  }
+];
+
+const QS = {
+  실내A:['청결 유지: 담당 구역(사무실, 화장실, 복도 등)의 청소 상태가 쾌적하게 유지되고 있는가?','직무 성실성: 정해진 근무 시간을 준수하며 배치된 구역에서 책임감 있게 업무에 임하는가?','서비스 태도: 대학 구성원(교직원, 학생)을 대하는 태도가 친절하고 민원 사항에 즉각 대응하는가?','시설 관리: 쓰레기 분리배출이 적절하며, 비품(휴지, 비누 등) 보급 및 도구 관리가 철저한가?'],
+  실내B:['청결 유지: 담당 구역(사무실, 화장실, 복도 등)의 청소 상태가 쾌적하게 유지되고 있는가?','직무 성실성: 정해진 근무 시간을 준수하며 배치된 구역에서 책임감 있게 업무에 임하는가?','서비스 태도: 대학 구성원(교직원, 학생)을 대하는 태도가 친절하고 민원 사항에 즉각 대응하는가?','시설 관리: 쓰레기 분리배출이 적절하며, 비품(휴지, 비누 등) 보급 및 도구 관리가 철저한가?'],
+  외곽:['환경 정비: 담당 야외 구역(도로, 광장, 녹지 등)의 쓰레기 및 낙엽 제거 상태가 양호한가?','상황 대응: 강우, 강설 등 기상 변화나 특이 상황 발생 시 신속하게 대응하여 보행 안전을 확보하는가?','장비 활용: 청소 차량이나 고압 세척기 등 외곽 장비를 안전 수칙에 따라 숙련되게 다루는가?','협력 역량: 넓은 구역에서 근무하면서도 동료 및 파트장과 원활하게 소통하며 협력하는가?'],
+  파트장:['현장 지휘: 소속 파트원들의 업무 배정을 효율적으로 수행하고 현장의 애로사항을 적절히 해결하는가?','품질 관리: 파트 내 담당 구역의 청결 상태를 정기적으로 순찰하고 미흡한 부분을 지도·개선하는가?','솔선수범: 업무 지시뿐만 아니라 필요시 현장 업무에 직접 참여하여 파트원들에게 모범을 보이는가?','보고 및 소통: 현장의 특이 사항이나 물품 필요량을 상급자(반장)에게 정확하고 신속하게 전달하는가?'],
+  반장:['조직 관리: 파트 간의 업무 균형을 유지하고 미화직 직원들 사이의 갈등을 원만하게 중재하는가?','운영 효율: 대학 행사나 학기별 일정에 맞춰 인력 운영 계획을 수립하고 차질 없이 이행하는가?','안전 및 교육: 작업 전 안전 교육을 실시하고 현장에서 사고 예방을 위한 감독을 철저히 하는가?','중간 관리자 역량: 학교 정책의 취지를 파트장과 실무자들에게 정확히 전파하는가?'],
+};
+
+const SCORES = [{l:'매우 우수',v:100},{l:'우수',v:90},{l:'보통',v:80},{l:'미흡',v:70},{l:'매우 미흡',v:60}];
+const TCLS = {'실내A':'t-indoor','실내B':'t-indoor2',외곽:'t-outdoor',파트장:'t-part',반장:'t-chief'};
+const TLBL = {'실내A':'실내 근무자A','실내B':'실내 근무자B',외곽:'외곽 근무자',파트장:'파트장',반장:'반장'};
+
+const DB = {};
+const SUBMITTED = {};
+let CU = null;
+let selEE = null;
+let evalFilter = 'all'; // 'all' | 'pending' | 'done'
+
+
+
+function login() {
+  const name = document.getElementById('inName').value.trim();
+  const pw   = document.getElementById('inPw').value;
+  const user = EVRS.find(v => v.name === name && v.pw === pw);
+  if (!user) { document.getElementById('errMsg').style.display = 'block'; return; }
+  CU = user;
+  document.getElementById('errMsg').style.display = 'none';
+  document.getElementById('scLogin').classList.remove('on');
+  document.getElementById('scApp').classList.add('on');
+  document.getElementById('topUser').textContent = `${user.name} · ${user.role}`;
+  document.getElementById('tab2').style.display = user.isAdmin ? '' : 'none';
+  goTab(1);
+  renderEval();
+}
+
+function logout() {
+  CU = null; selEE = null;
+  document.getElementById('scApp').classList.remove('on');
+  document.getElementById('scLogin').classList.add('on');
+  document.getElementById('inPw').value = '';
+  document.getElementById('inName').value = '';
+}
+
+// ── 탭 전환 ──
+function goTab(n) {
+  document.getElementById('tab1').classList.toggle('on', n===1);
+  document.getElementById('tab2').classList.toggle('on', n===2);
+  document.getElementById('pEval').classList.toggle('hidden', n!==1);
+  document.getElementById('pDash').classList.toggle('hidden', n!==2);
+  if(n===2) renderDash();
+}
+
+// ════════════════════════════
+//  평가 입력
+// ════════════════════════════
+function myTargets() {
+  if(!CU) return [];
+  if(CU.id==='admin') return EES;
+  // 행정부서팀장은 targets가 배열(id목록)로 저장
+  if(Array.isArray(CU.targets) && CU.targets[0] && CU.targets[0].startsWith('e')) {
+    return EES.filter(e => CU.targets.includes(e.id));
+  }
+  return EES.filter(e => CU.targets.includes(e.type));
+}
+
+function renderEval() {
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = '';
+  document.getElementById('formArea').innerHTML = '';
+  selEE = null;
+
+  let list = myTargets();
+  if(!list.length) {
+    grid.innerHTML = '<p style="color:var(--sub);font-size:14px;padding:20px;">담당 피평가자가 없습니다.</p>';
+    return;
+  }
+  // 필터 적용
+  if(evalFilter === 'pending') list = list.filter(ee => !(DB[ee.id] && DB[ee.id][CU.id]));
+  else if(evalFilter === 'done') list = list.filter(ee => DB[ee.id] && DB[ee.id][CU.id]);
+  if(!list.length) {
+    const msg = evalFilter === 'pending' ? '미평가 대상자가 없습니다. 모두 완료했어요! 🎉' : '완료된 평가가 없습니다.';
+    grid.innerHTML = `<p style="color:var(--sub);font-size:14px;padding:20px;">${msg}</p>`;
+    updateSubmitBar();
+    return;
+  }
+  // 헤더 행
+  const header = document.createElement('div');
+  header.className = 'list-header';
+  header.innerHTML = '<span>구분</span><span>담당구역</span><span>이름</span><span>평가 상태</span><span></span>';
+  grid.appendChild(header);
+
+  list.forEach(ee => {
+    const done = DB[ee.id] && DB[ee.id][CU.id];
+    const doneScore = done ? done.score : null;
+    const scoreLabel = doneScore !== null ? {100:'매우우수',90:'우수',80:'보통',70:'미흡',60:'매우미흡'}[doneScore]||'' : '';
+    const d = document.createElement('div');
+    d.className = `ev-card${done?' done':''}`;
+    d.innerHTML = `
+      <span class="type-tag ${TCLS[ee.type]}">${TLBL[ee.type]}</span>
+      <span style="font-size:13px;color:var(--sub)">${ee.zone||'-'}</span>
+      <span class="ev-name">${ee.name}</span>
+      ${done
+        ? `<span class="done-badge">✅ 완료 · ${doneScore}점 (${scoreLabel})</span>`
+        : `<span class="pending-badge">미평가</span>`}
+      <span class="arrow-col">›</span>
+    `;
+    d.onclick = () => {
+      if(SUBMITTED[CU.id]) return;
+      selEE = ee;
+      document.getElementById('cardGrid').style.display = 'none';
+      document.getElementById('submitBar').style.display = 'none';
+      renderForm(ee);
+    };
+    grid.appendChild(d);
+  });
+  updateSubmitBar();
+}
+
+function highlight(el) {
+  document.querySelectorAll('.ev-card').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function closeForm() {
+  document.getElementById('formArea').innerHTML = '';
+  document.getElementById('cardGrid').style.display = '';
+  updateSubmitBar();
+}
+
+function setFilter(type, btn) {
+  evalFilter = type;
+  document.querySelectorAll('.ftgl-btn').forEach(b => b.className = 'ftgl-btn');
+  if(type === 'all') btn.classList.add('on');
+  else if(type === 'pending') btn.classList.add('on-orange');
+  else if(type === 'done') btn.classList.add('on-green');
+  renderEval();
+}
+
+function renderForm(ee) {
+  const existing = DB[ee.id] && DB[ee.id][CU.id];
+  const curScore = existing ? existing.score : null;
+  const curComment = existing ? existing.comment : '';
+  const readOnly = CU.id === 'admin' || SUBMITTED[CU.id];
+
+  document.getElementById('formArea').innerHTML = `
+    <div style="margin-bottom:12px;">
+      <button onclick="closeForm()" style="background:none;border:none;color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:5px;padding:0;">
+        ‹ 목록으로 돌아가기
+      </button>
+    </div>
+    <div class="form-card">
+      <div class="form-top">
+        <div>
+          <h3>${ee.name} 님 평가</h3>
+          <div class="meta">평가자: ${CU.name} (${CU.role})</div>
+          <div class="meta" style="margin-top:3px;">담당구역: ${ee.zone||'-'}</div>
+        </div>
+        <span class="type-tag ${TCLS[ee.type]}" style="font-size:13px;padding:4px 12px">${TLBL[ee.type]}</span>
+      </div>
+
+      <div class="q-list">
+        <div class="q-label">📌 종합 평가 항목</div>
+        ${(QS[ee.type]||[]).map((q,i)=>`<div class="q-item"><strong>${i+1}.</strong> ${q}</div>`).join('')}
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div class="score-label-txt" style="margin-bottom:0">종합 평가 점수 선택${readOnly?' <span style="color:var(--sub);font-weight:400;font-size:12px">(관리자는 입력 불가)</span>':''}</div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="toggleNotice()" style="background:none;border:1.5px solid var(--red);color:var(--red);font-size:12px;font-weight:600;padding:4px 10px;border-radius:7px;cursor:pointer;font-family:inherit;" id="noticeToggleBtn">⚠️ 평가 유의사항</button>
+          <button onclick="toggleScaleGuide()" style="background:none;border:1.5px solid var(--border);color:var(--sub);font-size:12px;font-weight:600;padding:4px 10px;border-radius:7px;cursor:pointer;font-family:inherit;" id="scaleToggleBtn">📋 평가 기준 보기</button>
+        </div>
+      </div>
+      <div id="noticeGuide" style="display:none;background:#FEF2F2;border-radius:10px;border:1.5px solid #FECACA;margin-bottom:14px;padding:16px 18px;">
+        <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px;">⚠️ 평가 유의사항</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.8;">
+          <div style="margin-bottom:8px;display:flex;gap:8px;"><span style="font-weight:700;color:var(--red);flex-shrink:0;">1.</span><span>본 평가는 근로자의 고용 연장(무기계약/촉탁직 전환) 심사에 활용되는 중요 정량 자료이므로, 일괄 최고/최저점 부여 등을 금지합니다.</span></div>
+          <div style="display:flex;gap:8px;"><span style="font-weight:700;color:var(--red);flex-shrink:0;">2.</span><span>평가의 객관성과 현장 만족도를 정확히 반영하기 위하여, 해당 건물을 상시 사용하는 소속 교직원 및 학생들의 의견을 청취하고 이를 평가에 적극 반영하여 주시기 바랍니다.</span></div>
+        </div>
+      </div>
+      <div id="scaleGuide" style="display:none;background:#F6F8FC;border-radius:10px;border:1.5px solid var(--border);margin-bottom:14px;overflow:hidden;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead>
+            <tr style="background:var(--navy);color:white;">
+              <th style="padding:9px 14px;text-align:center;font-weight:600;width:90px;">등급</th>
+              <th style="padding:9px 14px;text-align:center;font-weight:600;width:70px;">점수</th>
+              <th style="padding:9px 14px;text-align:left;font-weight:600;">기준</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--green)">매우 우수</td><td style="padding:8px 14px;text-align:center;font-weight:700;">100점</td><td style="padding:8px 14px;color:var(--text)">모든 항목에서 업무 기준을 완벽히 이행하며, 담당 구역의 청결도가 탁월하고 구성원(교직원·학생)으로부터 적극적인 칭찬 또는 공식 표창을 받은 사례가 있음</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 14px;text-align:center;font-weight:700;color:#1E40AF">우수</td><td style="padding:8px 14px;text-align:center;font-weight:700;">90점</td><td style="padding:8px 14px;color:var(--text)">대부분의 항목에서 업무 기준을 성실히 이행하며, 담당 구역의 청결도가 우수하고 구성원(교직원·학생)의 만족도가 높음</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--orange)">보통</td><td style="padding:8px 14px;text-align:center;font-weight:700;">80점</td><td style="padding:8px 14px;color:var(--text)">지적 사항 없이 정해진 루틴에 따라 일반적인 청결 상태를 유지하며, 평균적인 수준으로 직무를 수행함</td></tr>
+            <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--red)">미흡</td><td style="padding:8px 14px;text-align:center;font-weight:700;">70점</td><td style="padding:8px 14px;color:var(--text)">정해진 근무 시간 미준수, 비품 관리 소홀, 또는 청소 상태 불량 등으로 인해 분기별 1~2회 이상 구두 지적 또는 민원이 발생함</td></tr>
+            <tr><td style="padding:8px 14px;text-align:center;font-weight:700;color:var(--sub)">매우 미흡</td><td style="padding:8px 14px;text-align:center;font-weight:700;">60점</td><td style="padding:8px 14px;color:var(--text)">담당 구역 방치, 상습적인 지시 불이행, 또는 구성원과의 심각한 갈등으로 대학 이미지를 실추시키거나 연 3회 이상 공식 민원이 접수됨</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size:12px;color:var(--sub);margin-bottom:12px;">※ 평가 항목을 종합적으로 고려하여 평가</div>
+      <div class="score-row">
+        ${SCORES.map(s=>`
+          <button class="sc-btn${curScore===s.v?' on':''}" ${readOnly?'disabled':''} onclick="pickScore(${s.v},this)">
+            <span class="sl">${s.l}</span>
+            <span class="sn">${s.v}</span>
+          </button>`).join('')}
+      </div>
+
+
+
+      ${!readOnly ? `
+        <div class="save-row">
+          <button class="btn-save" onclick="saveEval('${ee.id}')">저장</button>
+          <span class="save-ok" id="saveOk">✅ 저장되었습니다!</span>
+        </div>` : `<p style="font-size:13px;color:var(--sub)">관리자 계정은 평가 입력이 제한됩니다.</p>`}
+    </div>`;
+}
+
+function toggleNotice() {
+  const guide = document.getElementById('noticeGuide');
+  const btn = document.getElementById('noticeToggleBtn');
+  const isHidden = guide.style.display === 'none';
+  guide.style.display = isHidden ? 'block' : 'none';
+  btn.style.background = isHidden ? 'var(--red)' : 'none';
+  btn.style.color = isHidden ? 'white' : 'var(--red)';
+}
+
+function toggleScaleGuide() {
+  const guide = document.getElementById('scaleGuide');
+  const btn = document.getElementById('scaleToggleBtn');
+  const isHidden = guide.style.display === 'none';
+  guide.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? '📋 평가 기준 닫기' : '📋 평가 기준 보기';
+}
+
+function pickScore(v, btn) {
+  document.querySelectorAll('.sc-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function saveEval(eid) {
+  const btn = document.querySelector('.sc-btn.on');
+  if(!btn) { alert('점수를 선택해주세요.'); return; }
+  const score = parseInt(btn.querySelector('.sn').textContent);
+  const comment = '';
+  if(!DB[eid]) DB[eid]={};
+  DB[eid][CU.id] = {score, comment};
+  document.getElementById('formArea').innerHTML = '';
+  document.getElementById('cardGrid').style.display = '';
+  renderEval();
+  updateSubmitBar();
+}
+
+// ════════════════════════════
+//  평가 완료 버튼
+// ════════════════════════════
+function updateSubmitBar() {
+  if(!CU || CU.id==='admin') return;
+  const filterToggle = document.getElementById('filterToggle');
+  if(filterToggle) filterToggle.style.display = SUBMITTED[CU.id] ? 'none' : '';
+  const bar = document.getElementById('submitBar');
+  const list = myTargets();
+  if(!list.length) { bar.style.display='none'; return; }
+  bar.style.display='flex';
+
+  const doneCnt = list.filter(ee => DB[ee.id] && DB[ee.id][CU.id]).length;
+  const total = list.length;
+  const allDone = doneCnt === total;
+  const submitted = SUBMITTED[CU.id];
+
+  document.getElementById('doneCnt').textContent = doneCnt;
+  document.getElementById('totalCnt').textContent = ` / ${total}명 완료`;
+
+  const btn = document.getElementById('submitBtn');
+  const desc = document.getElementById('submitDesc');
+
+  if(submitted) {
+    btn.className = 'btn-submit completed';
+    btn.textContent = '✅ 제출 완료';
+    btn.disabled = true;
+    desc.textContent = '평가가 최종 제출되었습니다. 감사합니다!';
+    desc.style.color = 'var(--green)';
+  } else if(allDone) {
+    btn.className = 'btn-submit ready';
+    btn.textContent = '평가 완료';
+    btn.disabled = false;
+    desc.textContent = '모든 평가가 완료되었습니다. 제출 버튼을 눌러주세요.';
+    desc.style.color = 'var(--navy)';
+  } else {
+    btn.className = 'btn-submit';
+    btn.textContent = '평가 완료';
+    btn.disabled = true;
+    desc.textContent = `아직 ${total - doneCnt}명의 평가가 남아있습니다.`;
+    desc.style.color = 'var(--sub)';
+  }
+}
+
+function submitEval() {
+  const list = myTargets();
+  const doneCnt = list.filter(ee => DB[ee.id] && DB[ee.id][CU.id]).length;
+  if(doneCnt < list.length) return;
+  showModal(
+    '평가 최종 제출',
+    `총 <strong>${list.length}명</strong>의 평가를 최종 제출하시겠습니까?<br>제출 후에는 수정이 불가합니다.`,
+    '제출하기',
+    () => {
+      SUBMITTED[CU.id] = true;
+      updateSubmitBar();
+      document.getElementById('formArea').innerHTML = `
+        <div style="text-align:center;padding:48px 20px;background:white;border-radius:var(--radius);box-shadow:var(--shadow);">
+          <div style="font-size:48px;margin-bottom:16px;">✅</div>
+          <div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:8px;">평가가 완료되었습니다.</div>
+          <div style="font-size:14px;color:var(--sub);">${CU.name}님의 담당 피평가자 ${list.length}명에 대한<br>평가가 최종 제출되었습니다.</div>
+        </div>`;
+      document.querySelectorAll('.ev-card').forEach(c => c.style.pointerEvents = 'none');
+    }
+  );
+}
+
+function cancelSubmit(vid) {
+  const v = EVRS.find(e=>e.id===vid);
+  showModal(
+    '제출 해제',
+    `<strong>${v.name}</strong>님의 평가 제출을 해제하시겠습니까?<br>해제 시 해당 평가자가 다시 수정할 수 있게 됩니다.`,
+    '해제하기',
+    () => {
+      delete SUBMITTED[vid];
+      renderDash();
+    }
+  );
+}
+
+// ════════════════════════════
+//  로딩 오버레이
+// ════════════════════════════
+function showLoadingOverlay(txt='로딩 중...') {
+  document.getElementById('loadingTxt').textContent = txt;
+  document.getElementById('loadingOverlay').classList.add('on');
+}
+function hideLoadingOverlay() {
+  document.getElementById('loadingOverlay').classList.remove('on');
+}
+
+// ════════════════════════════
+//  비밀번호 변경
+// ════════════════════════════
+function showChangePw() {
+  document.getElementById('pwCurrent').value = '';
+  document.getElementById('pwNew').value = '';
+  document.getElementById('pwConfirm').value = '';
+  document.getElementById('pwErr').style.display = 'none';
+  document.getElementById('pwOk').style.display = 'none';
+  document.getElementById('pwModal').classList.add('on');
+}
+
+function hideChangePw() {
+  document.getElementById('pwModal').classList.remove('on');
+}
+
+function doChangePw() {
+  const current = document.getElementById('pwCurrent').value;
+  const newPw   = document.getElementById('pwNew').value;
+  const confirm = document.getElementById('pwConfirm').value;
+  const errEl   = document.getElementById('pwErr');
+  const okEl    = document.getElementById('pwOk');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+
+  if(current !== CU.pw) {
+    errEl.textContent = '현재 비밀번호가 올바르지 않습니다.';
+    errEl.style.display = 'block'; return;
+  }
+  if(newPw.length < 4) {
+    errEl.textContent = '새 비밀번호는 4자 이상이어야 합니다.';
+    errEl.style.display = 'block'; return;
+  }
+  if(newPw !== confirm) {
+    errEl.textContent = '새 비밀번호가 일치하지 않습니다.';
+    errEl.style.display = 'block'; return;
+  }
+  // 비밀번호 변경 적용
+  CU.pw = newPw;
+  const evr = EVRS.find(v => v.id === CU.id);
+  if(evr) evr.pw = newPw;
+  okEl.style.display = 'block';
+  setTimeout(() => hideChangePw(), 1500);
+}
+
+// ════════════════════════════
+//  모달
+// ════════════════════════════
+function showModal(title, msg, confirmTxt, onConfirm) {
+  const existing = document.getElementById('appModal');
+  if(existing) existing.remove();
+  const m = document.createElement('div');
+  m.id = 'appModal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:999;display:flex;align-items:center;justify-content:center;';
+  m.innerHTML = `
+    <div style="background:white;border-radius:18px;padding:32px 28px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.25);text-align:center;">
+      <div style="font-size:18px;font-weight:700;margin-bottom:12px;color:var(--navy)">${title}</div>
+      <div style="font-size:14px;color:var(--sub);line-height:1.7;margin-bottom:24px;">${msg}</div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="document.getElementById('appModal').remove()" style="flex:1;padding:11px;border:1.5px solid var(--border);background:white;border-radius:9px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--sub)">취소</button>
+        <button id="modalConfirmBtn" style="flex:1;padding:11px;background:var(--navy);color:white;border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">${confirmTxt}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  document.getElementById('modalConfirmBtn').onclick = () => { m.remove(); onConfirm(); };
+}
+
+// ════════════════════════════
+//  대시보드
+// ════════════════════════════
+function finalScore(eid) {
+  const ee = EES.find(e=>e.id===eid);
+  let tot=0, wsum=0;
+  EVRS.forEach(v=>{
+    if(v.id==='admin') return;
+    // 행정부서팀장은 담당 피평가자만
+    let w;
+    if(Array.isArray(v.targets) && v.targets[0] && v.targets[0].startsWith('e')) {
+      w = v.targets.includes(eid) ? (v.wt[ee.type]||0) : 0;
+    } else {
+      w = v.wt[ee.type] || 0;
+    }
+    if(!w) return;
+    const r = DB[eid] && DB[eid][v.id];
+    if(r){ tot += r.score*w; wsum += w; }
+  });
+  return wsum ? Math.round(tot/wsum) : null;
+}
+
+function chipClass(s) {
+  if(s===null) return 'c-none';
+  if(s>=95) return 'c-100';
+  if(s>=85) return 'c-90';
+  if(s>=75) return 'c-80';
+  if(s>=65) return 'c-70';
+  return 'c-60';
+}
+function chipLabel(s) {
+  if(s===null) return '미평가';
+  if(s>=95) return `${s}점 (매우우수)`;
+  if(s>=85) return `${s}점 (우수)`;
+  if(s>=75) return `${s}점 (보통)`;
+  if(s>=65) return `${s}점 (미흡)`;
+  return `${s}점 (매우미흡)`;
+}
+
+function renderDash() {
+  const ft = document.getElementById('fType').value;
+  const list = ft ? EES.filter(e=>e.type===ft) : EES;
+  const evrs = EVRS.filter(v=>v.id!=='admin');
+
+  // 피평가자별로 담당 평가자 전원이 평가한 경우만 완료로 집계
+  const isAllEvaluated = (ee) => {
+    const responsible = evrs.filter(v => {
+      if(Array.isArray(v.targets) && v.targets[0] && v.targets[0].startsWith('e'))
+        return v.targets.includes(ee.id);
+      return v.targets.includes(ee.type);
+    });
+    return responsible.length > 0 && responsible.every(v => DB[ee.id] && DB[ee.id][v.id]);
+  };
+  let done=0;
+  list.forEach(ee=>{ if(isAllEvaluated(ee)) done++; });
+
+  const scores = list.map(e=>finalScore(e.id)).filter(s=>s!==null);
+  const avg = scores.length ? Math.round(scores.reduce((a,b)=>a+b,0)/scores.length) : null;
+  const pct = list.length ? Math.round(done/list.length*100) : 0;
+
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat"><div class="sl">전체 피평가자</div><div class="sv">${list.length}<small style="font-size:14px;font-weight:400">명</small></div><div class="ss">${ft||'전체 구분'}</div></div>
+    <div class="stat"><div class="sl">평가 완료</div><div class="sv">${done}<small style="font-size:14px;font-weight:400">명</small></div><div class="ss"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div></div></div>
+    <div class="stat"><div class="sl">평균 점수</div><div class="sv">${avg!==null?avg:'-'}<small style="font-size:14px;font-weight:400">${avg!==null?'점':''}</small></div><div class="ss">최종 점수 기준</div></div>
+    <div class="stat"><div class="sl">미평가</div><div class="sv" style="color:var(--orange)">${list.length-done}<small style="font-size:14px;font-weight:400">명</small></div><div class="ss">평가 대기</div></div>
+  `;
+
+  const cols = evrs.filter(v=>!ft||list.some(ee=>v.targets.includes(ee.id)));
+
+  // 평가자별 완료 현황 카드
+  const evSummaryEl = document.getElementById('evSummary') || (() => {
+    const el = document.createElement('div');
+    el.id = 'evSummary';
+    el.style.cssText = 'display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;';
+    document.getElementById('resTbl').parentElement.before(el);
+    return el;
+  })();
+  evSummaryEl.innerHTML = cols.map(v => {
+    const myList = Array.isArray(v.targets) && v.targets[0] && v.targets[0].startsWith('e')
+      ? list.filter(ee => v.targets.includes(ee.id))
+      : list.filter(ee => v.targets.includes(ee.type));
+    const doneCnt = myList.filter(ee => DB[ee.id] && DB[ee.id][v.id]).length;
+    const total = myList.length;
+    const allDone = total > 0 && doneCnt === total;
+    const submitted = SUBMITTED[v.id];
+    const pct = total ? Math.round(doneCnt/total*100) : 0;
+    return `<div style="background:white;border-radius:10px;padding:14px 16px;box-shadow:var(--shadow-sm);min-width:170px;border:1.5px solid ${submitted?'var(--green)':allDone?'var(--navy2)':'var(--border)'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${v.name}</span>
+        ${submitted
+          ? '<span style="background:var(--green);color:white;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;">제출완료</span>'
+          : allDone
+            ? '<span style="background:#DBEAFE;color:var(--navy);font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;">입력완료</span>'
+            : '<span style="background:var(--orange-bg);color:var(--orange);font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;">진행중</span>'}
+      </div>
+      <div style="font-size:11px;color:var(--sub);margin-bottom:8px">${v.role}</div>
+      <div style="font-size:13px;font-weight:700;color:${submitted?'var(--green)':'var(--navy)'};">${doneCnt} / ${total}명</div>
+      <div style="font-size:11px;color:var(--sub);margin-top:1px;">평가 대상 ${total}명</div>
+      <div style="background:var(--border);border-radius:20px;height:4px;margin-top:6px;margin-bottom:${submitted?'10px':'0'}">
+        <div style="background:${submitted?'var(--green)':allDone?'var(--navy)':'var(--navy)'};width:${pct}%;height:100%;border-radius:20px;transition:width .5s"></div>
+      </div>
+      ${submitted ? `<button onclick="cancelSubmit('${v.id}')" style="margin-top:10px;width:100%;padding:6px;background:var(--red-bg);color:var(--red);border:1px solid #FECACA;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">제출 해제</button>` : ''}
+    </div>`;
+  }).join('');
+
+  // 비밀번호 테이블
+  const pwEvrs = EVRS.filter(v => v.id !== 'admin');
+  document.getElementById('pwTbl').innerHTML = `
+    <thead><tr>
+      <th>이름</th><th>직위/역할</th><th>비밀번호</th><th>초기비밀번호 여부</th>
+    </tr></thead>
+    <tbody>
+      ${pwEvrs.map(v => {
+        const isInit = v.pw === v.initialPw;
+        return `<tr>
+          <td class="nm">${v.name}</td>
+          <td>${v.role}</td>
+          <td><span style="font-family:monospace;font-size:14px;font-weight:700;letter-spacing:2px;">${v.pw}</span></td>
+          <td>${isInit
+            ? '<span class="chip c-none">초기 비밀번호</span>'
+            : '<span class="chip c-90">변경완료</span>'}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>`;
+
+  document.getElementById('resTbl').innerHTML = `
+    <thead><tr>
+      <th>성명</th><th>구분</th>
+      ${cols.map(v=>{
+        const myList = Array.isArray(v.targets) && v.targets[0] && v.targets[0].startsWith('e')
+          ? list.filter(ee => v.targets.includes(ee.id))
+          : list.filter(ee => v.targets.includes(ee.type));
+        const doneCnt = myList.filter(ee=>DB[ee.id]&&DB[ee.id][v.id]).length;
+        const allDone = myList.length>0 && doneCnt===myList.length;
+        return `<th>${v.name} ${allDone?'✅':''}<br><span style="font-size:10px;font-weight:400">${v.role}</span><br><span style="font-size:10px;font-weight:400;opacity:0.8">${doneCnt}/${myList.length}명 (대상 ${myList.length}명)</span></th>`;
+      }).join('')}
+      <th>최종점수<br><span style="font-size:10px;font-weight:400">(반영비율 적용)</span></th>
+    </tr></thead>
+    <tbody>
+      ${list.map(ee=>{
+        const fs = finalScore(ee.id);
+        const allEval = isAllEvaluated(ee);
+        return `<tr style="${allEval?'':'background:#FFFBF5'}">
+          <td class="nm">${ee.name}</td>
+          <td>${TLBL[ee.type]}</td>
+          ${cols.map(v=>{
+            // 평가 대상 여부 확인
+            const isTarget = Array.isArray(v.targets) && v.targets[0] && v.targets[0].startsWith('e')
+              ? v.targets.includes(ee.id)
+              : v.targets.includes(ee.type);
+            if(!isTarget) return `<td><span style="color:#D1D5DB">-</span></td>`;
+            const w = v.wt[ee.type] || v.wt['실내A'] || 0;
+            const r = DB[ee.id]&&DB[ee.id][v.id];
+            if(!r) return `<td><span class="chip c-none">미입력</span></td>`;
+            return `<td><span class="chip ${chipClass(r.score)}">${r.score}점</span><br><span style="font-size:10px;color:var(--sub)">반영${w}%</span></td>`;
+          }).join('')}
+          <td>
+            ${allEval
+              ? `<span class="chip c-100" style="font-size:11px;margin-bottom:4px;display:inline-block">✅ 평가완료</span><br><span class="chip ${chipClass(fs)}" style="font-size:13px;padding:4px 11px">${chipLabel(fs)}</span>`
+              : `<span class="chip c-none" style="font-size:12px;padding:4px 11px">⏳ 미평가</span>`}
+          </td>
+        </tr>`;
+      }).join('')}
+    </tbody>`;
+}
+
+function dlCSV() {
+  const ft = document.getElementById('fType').value;
+  const list = ft ? EES.filter(e=>e.type===ft) : EES;
+  const evrs = EVRS.filter(v=>v.id!=='admin');
+  let csv = '\uFEFF성명,구분,' + evrs.map(v=>v.name+'('+v.role+')').join(',') + ',최종점수\n';
+  list.forEach(ee=>{
+    const fs = finalScore(ee.id);
+    const row = [ee.name, TLBL[ee.type]];
+    evrs.forEach(v=>{ const r=DB[ee.id]&&DB[ee.id][v.id]; const w=v.wt[ee.type]; row.push(w?(r?r.score:'미입력'):'-'); });
+    row.push(fs!==null?fs:'미평가');
+    csv += row.join(',') + '\n';
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = '미화직_근무성적평가결과.csv';
+  a.click();
+}
+</script>
+</body>
+</html>
